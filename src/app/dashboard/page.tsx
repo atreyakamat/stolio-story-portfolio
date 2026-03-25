@@ -1,0 +1,200 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { FiPlus, FiTrash2, FiExternalLink, FiEdit, FiLogOut } from 'react-icons/fi';
+
+interface Portfolio {
+  id: string;
+  name: string;
+  slug: string;
+  themeStyle: string;
+  themeMode: string;
+  createdAt: string;
+}
+
+export default function DashboardPage() {
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState('');
+  const router = useRouter();
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [userRes, portfolioRes] = await Promise.all([
+          fetch('/api/auth/me'),
+          fetch('/api/portfolio'),
+        ]);
+
+        if (!userRes.ok) {
+          router.push('/login');
+          return;
+        }
+
+        const userData = await userRes.json();
+        setUserName(userData.user?.name || userData.user?.email || 'User');
+
+        if (portfolioRes.ok) {
+          const data = await portfolioRes.json();
+          setPortfolios(data.portfolios);
+        }
+      } catch {
+        router.push('/login');
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, [router]);
+
+  async function handleDelete(id: string) {
+    if (!confirm('Are you sure you want to delete this portfolio?')) return;
+
+    try {
+      const res = await fetch(`/api/portfolio/${id}`, { method: 'DELETE' });
+      if (res.ok) {
+        setPortfolios((prev) => prev.filter((p) => p.id !== id));
+      }
+    } catch {
+      alert('Failed to delete portfolio');
+    }
+  }
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/');
+  }
+
+  const themeColors: Record<string, string> = {
+    minimal: '#10b981',
+    glassmorphism: '#8b5cf6',
+    neobrutalism: '#ff6b6b',
+    y2k: '#00ff88',
+    clay: '#7c3aed',
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#050505] text-white">
+      {/* Nav */}
+      <nav className="border-b border-white/5 bg-[#050505]/80 backdrop-blur-xl">
+        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="text-xl font-bold">
+            <span className="bg-gradient-to-r from-violet-400 to-emerald-400 bg-clip-text text-transparent">
+              Stolio
+            </span>
+          </Link>
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-gray-400">Welcome, {userName}</span>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition-colors"
+            >
+              <FiLogOut size={14} /> Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="max-w-6xl mx-auto px-6 py-12">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10">
+          <div>
+            <h1 className="text-3xl font-bold">Your Portfolios</h1>
+            <p className="text-gray-400 mt-1 text-sm">{portfolios.length} of 2 portfolios used</p>
+          </div>
+          {portfolios.length < 2 && (
+            <Link
+              href="/create"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 hover:from-violet-500 hover:to-violet-400 text-white font-medium text-sm transition-all shadow-lg shadow-violet-500/20"
+            >
+              <FiPlus size={16} /> New Portfolio
+            </Link>
+          )}
+        </div>
+
+        {/* Portfolio Grid */}
+        {portfolios.length === 0 ? (
+          <motion.div
+            className="text-center py-20 rounded-2xl border border-dashed border-white/10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          >
+            <div className="w-16 h-16 rounded-full bg-violet-500/10 flex items-center justify-center mx-auto mb-4">
+              <FiPlus size={24} className="text-violet-400" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No portfolios yet</h3>
+            <p className="text-gray-400 text-sm mb-6">Create your first AI-generated portfolio in minutes.</p>
+            <Link
+              href="/create"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-violet-500 text-white font-medium text-sm transition-all"
+            >
+              <FiPlus size={16} /> Create Portfolio
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {portfolios.map((portfolio, i) => (
+              <motion.div
+                key={portfolio.id}
+                className="p-6 rounded-2xl border border-white/5 bg-white/[0.02] hover:bg-white/[0.04] transition-all group"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <h3 className="text-xl font-semibold">{portfolio.name}</h3>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ background: themeColors[portfolio.themeStyle] || '#888' }}
+                      />
+                      <span className="text-xs text-gray-400 capitalize">{portfolio.themeStyle}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-500 mb-4 font-mono">
+                  /portfolio/{portfolio.slug}
+                </p>
+
+                <div className="flex items-center gap-3">
+                  <Link
+                    href={`/portfolio/${portfolio.slug}`}
+                    target="_blank"
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                    <FiExternalLink size={14} /> View
+                  </Link>
+                  <Link
+                    href={`/edit/${portfolio.id}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/5 hover:bg-white/10 transition-colors"
+                  >
+                    <FiEdit size={14} /> Edit
+                  </Link>
+                  <button
+                    onClick={() => handleDelete(portfolio.id)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-400 transition-colors ml-auto"
+                  >
+                    <FiTrash2 size={14} /> Delete
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
