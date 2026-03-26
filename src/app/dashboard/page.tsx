@@ -4,7 +4,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { FiPlus, FiTrash2, FiExternalLink, FiEdit, FiLogOut } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiExternalLink, FiEdit, FiLogOut, FiEye, FiMail, FiX, FiClock } from 'react-icons/fi';
+
+interface ContactMessage {
+  id: string;
+  senderName: string;
+  senderEmail: string;
+  message: string;
+  createdAt: string;
+}
 
 interface Portfolio {
   id: string;
@@ -12,13 +20,17 @@ interface Portfolio {
   slug: string;
   themeStyle: string;
   themeMode: string;
+  views: number;
   createdAt: string;
+  messages?: ContactMessage[];
 }
 
 export default function DashboardPage() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
   const [userName, setUserName] = useState('');
+  const [selectedPortfolioMessages, setSelectedPortfolioMessages] = useState<ContactMessage[] | null>(null);
+  const [isMessagesOpen, setIsMessagesOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -39,6 +51,7 @@ export default function DashboardPage() {
 
         if (portfolioRes.ok) {
           const data = await portfolioRes.json();
+          // The API needs to return messages too, or we fetch them separately
           setPortfolios(data.portfolios);
         }
       } catch {
@@ -49,6 +62,19 @@ export default function DashboardPage() {
     }
     load();
   }, [router]);
+
+  async function fetchMessages(id: string) {
+    try {
+      const res = await fetch(`/api/portfolio/${id}/messages`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedPortfolioMessages(data.messages);
+        setIsMessagesOpen(true);
+      }
+    } catch {
+      alert('Failed to load messages');
+    }
+  }
 
   async function handleDelete(id: string) {
     if (!confirm('Are you sure you want to delete this portfolio?')) return;
@@ -169,6 +195,20 @@ export default function DashboardPage() {
                   /portfolio/{portfolio.slug}
                 </p>
 
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-400 bg-white/5 px-2 py-1 rounded-md">
+                    <FiEye size={12} className="text-emerald-400" />
+                    <span>{portfolio.views} views</span>
+                  </div>
+                  <button 
+                    onClick={() => fetchMessages(portfolio.id)}
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white bg-white/5 hover:bg-violet-500/20 px-2 py-1 rounded-md transition-all"
+                  >
+                    <FiMail size={12} className="text-violet-400" />
+                    <span>Messages</span>
+                  </button>
+                </div>
+
                 <div className="flex items-center gap-3">
                   <Link
                     href={`/portfolio/${portfolio.slug}`}
@@ -195,6 +235,56 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+
+      {/* Messages Modal */}
+      {isMessagesOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm" 
+            onClick={() => setIsMessagesOpen(false)} 
+          />
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            className="relative w-full max-w-2xl bg-[#0a0a0a] border border-white/10 rounded-2xl overflow-hidden flex flex-col max-h-[80vh]"
+          >
+            <div className="p-6 border-b border-white/5 flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold">Recruiter Messages</h2>
+                <p className="text-xs text-gray-500 mt-1">People interested in your portfolio</p>
+              </div>
+              <button onClick={() => setIsMessagesOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+                <FiX size={20} />
+              </button>
+            </div>
+            <div className="flex-grow overflow-y-auto p-6 space-y-4">
+              {!selectedPortfolioMessages || selectedPortfolioMessages.length === 0 ? (
+                <div className="text-center py-10 opacity-40">
+                  <FiMail size={40} className="mx-auto mb-4" />
+                  <p>No messages yet. They will appear here when someone reaches out!</p>
+                </div>
+              ) : (
+                selectedPortfolioMessages.map((msg) => (
+                  <div key={msg.id} className="p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <h4 className="font-bold text-violet-400">{msg.senderName}</h4>
+                        <p className="text-xs text-gray-500">{msg.senderEmail}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] text-gray-600">
+                        <FiClock />
+                        {new Date(msg.createdAt).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <p className="text-sm text-gray-300 leading-relaxed italic">&quot;{msg.message}&quot;</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }

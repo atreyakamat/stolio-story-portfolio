@@ -1,14 +1,17 @@
 import { PortfolioData } from '@/types/portfolio';
 
 const OLLAMA_URL = process.env.OLLAMA_URL || 'http://localhost:11434';
+const OLLAMA_API_KEY = process.env.OLLAMA_API_KEY;
+const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-lite:preview';
 
 function generateMockPortfolio(resumeText: string): PortfolioData {
   // Parse some basic info from resume text
   const lines = resumeText.split('\n').filter(l => l.trim());
-  const name = lines[0]?.trim() || 'John Doe';
+  const name = lines[0]?.trim() || 'Professional';
 
   // Try to detect title from second line or fallback
-  const title = lines[1]?.trim() || 'Software Developer';
+  const title = lines[1]?.trim() || 'Software Engineer';
 
   return {
     name,
@@ -29,102 +32,145 @@ function generateMockPortfolio(resumeText: string): PortfolioData {
     ],
     projects: [
       {
-        name: 'CloudSync Platform',
-        description: 'A real-time collaboration platform enabling teams to sync documents and data across devices seamlessly. Built with WebSocket architecture for instant updates.',
-        technologies: ['React', 'Node.js', 'WebSocket', 'PostgreSQL'],
-        link: 'https://example.com/cloudsync',
-        github: 'https://github.com/username/cloudsync',
-      },
-      {
-        name: 'AI Content Analyzer',
-        description: 'Machine learning powered tool that analyzes content sentiment, readability, and SEO score. Features an intuitive dashboard with real-time analysis.',
-        technologies: ['Python', 'TensorFlow', 'FastAPI', 'React'],
-        github: 'https://github.com/username/ai-analyzer',
-      },
-      {
-        name: 'DevMetrics Dashboard',
-        description: 'Developer productivity tracking dashboard that integrates with GitHub, Jira, and Slack to provide actionable insights on team performance.',
-        technologies: ['Next.js', 'TypeScript', 'D3.js', 'Prisma'],
-        link: 'https://example.com/devmetrics',
+        name: 'Portfolio Builder',
+        description: 'An AI-powered portfolio generator that helps developers showcase their work beautifully.',
+        technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind'],
       },
     ],
     experience: [
       {
         title: 'Senior Software Engineer',
-        organization: 'TechCorp Inc.',
+        organization: 'Innovation Lab',
         period: '2022 - Present',
-        description: 'Leading development of microservices architecture serving 1M+ users. Mentoring junior developers and driving technical decisions.',
+        description: 'Building modern web applications using cutting-edge technologies.',
         type: 'work',
-      },
-      {
-        title: 'Software Developer',
-        organization: 'StartupHub',
-        period: '2020 - 2022',
-        description: 'Built and scaled the core product from 0 to 100K users. Implemented CI/CD pipelines and automated testing frameworks.',
-        type: 'work',
-      },
-      {
-        title: 'B.S. Computer Science',
-        organization: 'University of Technology',
-        period: '2016 - 2020',
-        description: 'Graduated with honors. Focused on algorithms, distributed systems, and machine learning.',
-        type: 'education',
       },
     ],
     links: [
-      { platform: 'email', url: 'mailto:hello@example.com', label: 'hello@example.com' },
-      { platform: 'github', url: 'https://github.com/username', label: 'GitHub' },
-      { platform: 'linkedin', url: 'https://linkedin.com/in/username', label: 'LinkedIn' },
-      { platform: 'twitter', url: 'https://twitter.com/username', label: 'Twitter' },
+      { platform: 'email', url: 'mailto:hello@example.com', label: 'Email' },
     ],
   };
 }
 
-async function generateWithOllama(resumeText: string): Promise<PortfolioData | null> {
-  try {
-    const prompt = `You are an AI that converts resume text into structured portfolio data. 
-Given the following resume text, extract and generate a JSON object with this exact structure:
-{
-  "name": "Full Name",
-  "title": "Professional Title",
-  "tagline": "A compelling professional tagline",
-  "bio": "A 2-3 paragraph professional bio written in first person",
-  "skills": [{"name": "Skill", "category": "Category"}],
-  "projects": [{"name": "Project", "description": "Description", "technologies": ["Tech"], "link": "URL", "github": "URL"}],
-  "experience": [{"title": "Title", "organization": "Org", "period": "Period", "description": "Description", "type": "work|education|internship"}],
-  "links": [{"platform": "email|github|linkedin|twitter", "url": "URL", "label": "Label"}]
-}
+const GENERATION_PROMPT = (resumeText: string) => `You are an expert personal branding consultant and copywriter.
+Given the following resume text, extract information and write a highly compelling, personalized story for a developer portfolio.
+Be creative and ensure the tone is professional but unique and engaging.
 
 Resume text:
 ${resumeText}
 
-Return ONLY valid JSON, no other text.`;
+Generate a JSON object with this exact structure:
+{
+  "name": "Full Name",
+  "title": "Professional Title (make it catchy and accurate)",
+  "tagline": "A unique and compelling one-sentence professional tagline that captures their essence",
+  "bio": "A 2-3 paragraph professional bio written in first person. Focus on their story, passion, and unique value proposition.",
+  "skills": [{"name": "Skill", "category": "Category (e.g., Frontend, Backend, Tools, Soft Skills)"}],
+  "projects": [{"name": "Project Name", "description": "Engaging description of the project and its impact", "technologies": ["Tech"], "link": "Optional URL", "github": "Optional GitHub URL"}],
+  "experience": [{"title": "Job Title or Degree", "organization": "Company or School", "period": "e.g., 2020 - 2024", "description": "Key achievements and responsibilities", "type": "work|education|internship"}],
+  "links": [{"platform": "email|github|linkedin|twitter|website", "url": "URL", "label": "Label"}]
+}
+
+IMPORTANT:
+1. Return ONLY valid JSON, no other text or explanation.
+2. If certain links or projects are missing from the resume, create reasonable placeholders or omit them.
+3. Ensure the bio is high-quality and flows well.
+4. Categories for skills should be consistent (e.g., all "Frontend" not "Front-end").`;
+
+async function generateWithOllama(resumeText: string): Promise<PortfolioData | null> {
+  try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    if (OLLAMA_API_KEY) {
+      headers['Authorization'] = `Bearer ${OLLAMA_API_KEY}`;
+    }
 
     const response = await fetch(`${OLLAMA_URL}/api/generate`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       body: JSON.stringify({
         model: 'llama3.2',
-        prompt,
+        prompt: GENERATION_PROMPT(resumeText),
         stream: false,
         format: 'json',
       }),
     });
 
-    if (!response.ok) return null;
+    if (!response.ok) {
+      console.warn(`Ollama failed: ${response.statusText}`);
+      return null;
+    }
 
     const data = await response.json();
     const parsed = JSON.parse(data.response);
     return parsed as PortfolioData;
-  } catch {
+  } catch (error) {
+    console.error('Ollama error:', error);
+    return null;
+  }
+}
+
+async function generateWithOpenRouter(resumeText: string): Promise<PortfolioData | null> {
+  if (!OPENROUTER_API_KEY) {
+    console.warn('OpenRouter API Key not configured');
+    return null;
+  }
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'HTTP-Referer': 'https://stolio.app', // Required by OpenRouter
+        'X-Title': 'Stolio Story Portfolio',
+      },
+      body: JSON.stringify({
+        model: OPENROUTER_MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional portfolio writer. You always respond with valid JSON.'
+          },
+          {
+            role: 'user',
+            content: GENERATION_PROMPT(resumeText),
+          }
+        ],
+        response_format: { type: 'json_object' }
+      }),
+    });
+
+    if (!response.ok) {
+      console.warn(`OpenRouter failed: ${response.statusText}`);
+      return null;
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content;
+    if (!content) return null;
+
+    return JSON.parse(content) as PortfolioData;
+  } catch (error) {
+    console.error('OpenRouter error:', error);
     return null;
   }
 }
 
 export async function generatePortfolio(resumeText: string): Promise<PortfolioData> {
-  // Try Ollama first, fall back to mock
+  // Try Ollama first
   const ollamaResult = await generateWithOllama(resumeText);
-  if (ollamaResult) return ollamaResult;
+  if (ollamaResult) {
+    console.log('Successfully generated with Ollama');
+    return ollamaResult;
+  }
 
+  // Fallback to OpenRouter
+  const openRouterResult = await generateWithOpenRouter(resumeText);
+  if (openRouterResult) {
+    console.log('Successfully generated with OpenRouter');
+    return openRouterResult;
+  }
+
+  console.warn('All AI generators failed, falling back to mock data');
   return generateMockPortfolio(resumeText);
 }

@@ -33,6 +33,10 @@ export async function POST(request: NextRequest) {
     // Generate portfolio content using AI
     const portfolioData = await generatePortfolio(resumeText);
 
+    // Randomize theme if not provided
+    const themeOptions = ['minimal', 'glassmorphism', 'neobrutalism', 'y2k', 'clay'];
+    const finalThemeStyle = themeStyle || themeOptions[Math.floor(Math.random() * themeOptions.length)];
+
     // Create unique slug
     const baseSlug = portfolioData.name
       .toLowerCase()
@@ -51,7 +55,7 @@ export async function POST(request: NextRequest) {
         userId: authUser.userId,
         name: portfolioData.name,
         slug,
-        themeStyle: themeStyle || 'minimal',
+        themeStyle: finalThemeStyle,
         themeMode: themeMode || 'dark',
         content: {
           create: {

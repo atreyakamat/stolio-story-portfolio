@@ -19,6 +19,12 @@ export default async function PublicPortfolioPage({
     notFound();
   }
 
+  // Increment view count in background
+  prisma.portfolio.update({
+    where: { id: portfolio.id },
+    data: { views: { increment: 1 } },
+  }).catch(console.error);
+
   const portfolioData: PortfolioData = {
     name: portfolio.content.name,
     title: portfolio.content.title,
@@ -34,6 +40,7 @@ export default async function PublicPortfolioPage({
     <PortfolioRendererWrapper
       data={portfolioData}
       themeStyle={portfolio.themeStyle as ThemeStyle}
+      portfolioId={portfolio.id}
     />
   );
 }

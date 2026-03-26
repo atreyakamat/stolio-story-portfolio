@@ -6,7 +6,7 @@
 
 The purpose of this design document is to define how Stolio will present its product experience to users. It outlines the user journey, interface structure, component system, visual styles, and interaction patterns used in the platform.
 
-The goal of the Stolio design system is to create portfolio websites that feel **personal, animated, and story-driven** while maintaining performance and simplicity. Instead of allowing full drag-and-drop editing like traditional website builders, Stolio will assemble portfolio pages using a structured set of reusable components. These components will be visually styled through different design systems such as Glassmorphism, Neobrutalism, Y2K Web, Clay UI, and Minimal Developer.
+The goal of the Stolio design system is to create portfolio websites that feel **personal, animated, and story-driven** while maintaining performance and simplicity. Instead of templates or predefined themes, Stolio uses a **Generative UI approach**. The AI determines the layout, spacing, colors, and typography independently for each user. A customized, unrepeatable portfolio is materialized dynamically by mapping the AI's generated UI JSON into React components styled with Tailwind CSS configuration parameters.
 
 The design approach prioritizes clarity, storytelling, and performance. Each portfolio page will guide the viewer through a person’s professional story rather than presenting information in static blocks.
 
@@ -95,25 +95,16 @@ Once complete, a preview of the portfolio is generated.
 
 ---
 
-### Step 5 — Style Selection
+### Step 5 — Customization Prompting
 
-Before finalizing the portfolio, the user chooses a visual style.
+Before finalizing the portfolio, the user enters a customization phase via an interactive chat interface.
 
-Available styles include:
+The user can prompt the AI to change the vibe or the generated layout:
+- "Make it feel more like a vintage terminal."
+- "Use a neon pink and dark blue color palette."
+- "Change my skills section to 3 columns."
 
-Minimal Developer
-Glassmorphism
-Neobrutalism
-Y2K Web
-Clay UI
-
-Users also choose theme preference:
-
-Light mode only
-Dark mode only
-Mixed light and dark
-
-The selected style is applied to the portfolio preview.
+The AI regenerates the UI AST dynamically to reflect the user's exact preferences.
 
 ---
 
@@ -261,78 +252,26 @@ Each component supports multiple visual variations depending on the selected sty
 
 ---
 
-# 6. Visual Style System
+# 6. Generative Design Attributes
 
-Stolio supports five visual styles in the MVP.
+Rather than hardcoding visual styles like "Minimal" or "Neobrutalism", the UI is composed using generative attributes selected by the AI:
 
-Each style defines:
+### Layouts
+• Stacked vertical layouts
+• Asymmetrical grids
+• Masonry
+• Split columns
 
-• color palette
-• typography
-• component appearance
-• motion behavior
+### Theming Parameters
+• Base & accent colors mapped closely to content sentiment
+• Typography pairs (e.g. geometric sans combined with elegant serifs)
+• Component border radii (e.g. sharp vs pill vs soft rounded)
+• Shadow intensity and diffusion
 
----
-
-## Minimal Developer
-
-Clean layout focused on readability.
-
-Features:
-
-• neutral color palette
-• minimal animations
-• developer-friendly typography
-
----
-
-## Glassmorphism
-
-Uses frosted glass panels and background blur effects.
-
-Features:
-
-• translucent panels
-• soft shadows
-• subtle gradients
-
----
-
-## Neobrutalism
-
-Bold and playful style.
-
-Features:
-
-• thick borders
-• bright colors
-• exaggerated shadows
-
----
-
-## Y2K Web
-
-Retro aesthetic inspired by early internet design.
-
-Features:
-
-• metallic gradients
-• neon colors
-• experimental typography
-
----
-
-## Clay UI
-
-Soft three-dimensional design.
-
-Features:
-
-• rounded shapes
-• soft shadows
-• layered cards
-
----
+### Effects
+• Background blur/glassmorphism toggles
+• Subtle animated background blobs
+• Border styles (e.g. thick dark boundaries for brutalism)
 
 # 7. Animation System
 
@@ -438,7 +377,7 @@ These deliverables allow developers to implement consistent portfolio pages.
 | Core Experience | AI-generated storytelling portfolios                  |
 | Page Structure  | Hero → About → Skills → Projects → Timeline → Contact |
 | Editing Method  | Prompt editing and field editing                      |
-| Styles          | 5 visual design systems                               |
+| Styles          | Generative AI UI (Tailwind AST)       |
 | Output          | Public portfolio websites                             |
 
 ---

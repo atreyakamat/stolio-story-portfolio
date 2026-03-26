@@ -10,9 +10,9 @@ The goal of Stolio is to make portfolio creation effortless while still producin
 
 When a user signs up on Stolio, they can upload their resume or paste text describing their professional experience. The system processes this input using AI and converts it into structured data. This structured profile is then used to generate a portfolio website composed of sections such as a hero introduction, personal story, skills overview, projects showcase, timeline, and contact links.
 
-The generated portfolio is not static content pasted into a template. Instead, it is assembled dynamically using a library of animated components and visual styles. In the first version of the product, users will be able to choose from five visual styles including Minimal Developer, Glassmorphism, Neobrutalism, Y2K Web, and Clay UI. These styles affect the visual identity of the site without changing the core narrative structure.
+The generated portfolio is not static content pasted into a template. Instead, it is assembled dynamically using an AI-generated Abstract Syntax Tree (AST) representing the UI. Every layout, color palette, typography choice, and animation is uniquely generated for the user based on their profile, ensuring no two portfolios can be replicated or look identical.
 
-Users will also have the ability to edit their portfolio after generation. Instead of a complex drag-and-drop editor, Stolio will allow editing through AI prompts or simple field updates. For example, a user might request a rewrite of their bio or add a new project description. The system will update the structured portfolio data and regenerate the relevant section.
+Users will also have the ability to explicitly prompt the AI to customize their portfolio. They can ask to transform the vibe (e.g. "make it cyberpunk"), change layouts (e.g. "change my skills section to a grid"), or modify specific text. The system updates the UI AST and rerenders the page dynamically.
 
 Portfolios generated on Stolio are public by default and accessible through a shareable link. This makes them easy to send to recruiters, share on LinkedIn, or include in job applications. Each user can create up to two portfolios on the free plan, while additional portfolios will require a premium subscription.
 
@@ -134,18 +134,17 @@ Links and social profiles.
 
 ---
 
-## Visual Style System
+## Generative UI Engine
 
-Users can choose from five visual styles in the MVP:
+Instead of templates or fixed visual styles, Stolio uses a **Generative UI Engine**.
+The AI evaluates the user's content and returns a structured UI JSON describing:
 
-Minimal Developer
-Glassmorphism
-Neobrutalism
-Y2K Web
-Clay UI
+• The exact layout components (grids, flex rows, carousels)
+• Color palettes, typography, and spacing
+• Background effects (translucency, gradients, noise)
+• Interactions and animations
 
-These styles modify color palettes, UI components, and visual behavior while keeping the same underlying structure.
-
+Because the styling and structure are determined parametrically by the AI for each session, every portfolio is guaranteed to be entirely unique and bespoke to the individual user.
 ---
 
 ## Theme Preferences
@@ -323,7 +322,7 @@ These risks will be mitigated by limiting scope and focusing on automated storyt
 | Resume upload           | Included        |
 | Text input              | Included        |
 | AI narrative generation | Included        |
-| Portfolio styles        | 5 styles        |
+| Portfolio styles        | Generative AI Layouts |
 | Dark mode support       | Included        |
 | Prompt editing          | Included        |
 | Public portfolio URLs   | Included        |
