@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiArrowLeft, FiArrowRight, FiCheck, FiLoader } from 'react-icons/fi';
-import { ThemeStyle } from '@/types/portfolio';
+import { FiArrowLeft, FiArrowRight, FiCheck, FiLoader, FiSun, FiMoon } from 'react-icons/fi';
+import { ThemeStyle, ThemeMode } from '@/types/portfolio';
 import { PortfolioRenderer } from '@/components/portfolio/PortfolioRenderer';
 import type { PortfolioData } from '@/types/portfolio';
 
@@ -21,6 +21,7 @@ export default function CreatePage() {
   const [step, setStep] = useState(1);
   const [resumeText, setResumeText] = useState('');
   const [selectedTheme, setSelectedTheme] = useState<ThemeStyle>('minimal');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('dark');
   const [generating, setGenerating] = useState(false);
   const [generatedData, setGeneratedData] = useState<PortfolioData | null>(null);
   const [portfolioSlug, setPortfolioSlug] = useState('');
@@ -50,7 +51,7 @@ export default function CreatePage() {
         body: JSON.stringify({
           resumeText,
           themeStyle: selectedTheme,
-          themeMode: 'dark',
+          themeMode: themeMode,
         }),
       });
 
@@ -225,6 +226,31 @@ AI Analyzer - ML-powered content analysis tool`}
                   )}
                 </button>
               ))}
+            </div>
+
+            <div className="mt-8 p-4 rounded-xl border border-white/10 bg-white/[0.02]">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm font-medium text-gray-300">Theme Mode</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setThemeMode('light')}
+                    className={`p-2 rounded-lg transition-all ${themeMode === 'light' ? 'bg-violet-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    <FiSun size={18} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setThemeMode('dark')}
+                    className={`p-2 rounded-lg transition-all ${themeMode === 'dark' ? 'bg-violet-500 text-white' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    <FiMoon size={18} />
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-gray-500">
+                {themeMode === 'light' ? 'Light mode gives a clean, professional look.' : 'Dark mode adds depth and modern appeal.'}
+              </p>
             </div>
 
             <div className="flex justify-between mt-8">

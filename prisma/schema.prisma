@@ -26,11 +26,13 @@ model Portfolio {
   themeMode    String            @default("dark")
   isPublished  Boolean           @default(true)
   views        Int               @default(0)
+  githubUsername String?
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   content      PortfolioContent?
   messages     ContactMessage[]
+  viewLogs     ViewLog[]
 }
 
 model PortfolioContent {
@@ -53,6 +55,16 @@ model ContactMessage {
   senderName  String
   senderEmail String
   message     String
+  createdAt   DateTime  @default(now())
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+}
+
+model ViewLog {
+  id          String    @id @default(cuid())
+  portfolioId String
+  referrer    String?
+  userAgent   String?
+  country     String?
   createdAt   DateTime  @default(now())
   portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
 }

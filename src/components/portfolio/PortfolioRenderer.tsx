@@ -9,6 +9,9 @@ import { TimelineSection } from './TimelineSection';
 import { ContactSection } from './ContactSection';
 import { PortfolioAssistant } from './PortfolioAssistant';
 import { PortfolioData, ThemeStyle } from '@/types/portfolio';
+import dynamic from 'next/dynamic';
+
+const ViewTracker = dynamic(() => import('@/app/portfolio/[username]/ViewTracker').then(m => ({ default: m.ViewTracker })), { ssr: false });
 
 interface PortfolioRendererProps {
   data: PortfolioData;
@@ -19,6 +22,7 @@ interface PortfolioRendererProps {
 export function PortfolioRenderer({ data, themeStyle, portfolioId }: PortfolioRendererProps) {
   return (
     <ThemeProvider style={themeStyle}>
+      {portfolioId && <ViewTracker portfolioId={portfolioId} />}
       <HeroSection data={data} />
       <AboutSection data={data} />
       <SkillsSection skills={data.skills} />

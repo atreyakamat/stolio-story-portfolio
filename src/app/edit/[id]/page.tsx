@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiArrowLeft, FiSave, FiEye, FiPlus, FiTrash2, FiRefreshCw, FiLoader } from 'react-icons/fi';
-import { PortfolioData, ThemeStyle, Project, Experience, Link as PortfolioLink } from '@/types/portfolio';
+import { PortfolioData, ThemeStyle, Project, Experience } from '@/types/portfolio';
 
 const themeOptions: ThemeStyle[] = ['minimal', 'glassmorphism', 'neobrutalism', 'y2k', 'clay'];
 

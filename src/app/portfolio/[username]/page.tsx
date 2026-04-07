@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/prisma';
 import { ThemeStyle, PortfolioData } from '@/types/portfolio';
@@ -19,21 +20,17 @@ export default async function PublicPortfolioPage({
     notFound();
   }
 
-  // Increment view count in background
-  prisma.portfolio.update({
-    where: { id: portfolio.id },
-    data: { views: { increment: 1 } },
-  }).catch(console.error);
+  const content = portfolio.content;
 
   const portfolioData: PortfolioData = {
-    name: portfolio.content.name,
-    title: portfolio.content.title,
-    tagline: portfolio.content.tagline,
-    bio: portfolio.content.bio,
-    skills: JSON.parse(portfolio.content.skills),
-    projects: JSON.parse(portfolio.content.projects),
-    experience: JSON.parse(portfolio.content.experience),
-    links: JSON.parse(portfolio.content.links),
+    name: content.name,
+    title: content.title,
+    tagline: content.tagline,
+    bio: content.bio,
+    skills: JSON.parse(content.skills),
+    projects: JSON.parse(content.projects),
+    experience: JSON.parse(content.experience),
+    links: JSON.parse(content.links),
   };
 
   return (
@@ -49,7 +46,7 @@ export async function generateMetadata({
   params,
 }: {
   params: Promise<{ username: string }>;
-}) {
+}): Promise<Metadata> {
   const { username } = await params;
   
   const portfolio = await prisma.portfolio.findUnique({
@@ -61,8 +58,15 @@ export async function generateMetadata({
     return { title: 'Portfolio Not Found' };
   }
 
+  const content = portfolio.content;
+
   return {
-    title: `${portfolio.content.name} — ${portfolio.content.title} | Stolio`,
-    description: portfolio.content.tagline,
+    title: `${content.name} — ${content.title} | Stolio`,
+    description: content.tagline,
+    openGraph: {
+      title: `${content.name} — ${content.title}`,
+      description: content.tagline,
+      type: 'profile',
+    },
   };
 }

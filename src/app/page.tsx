@@ -2,14 +2,15 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { FiArrowRight, FiZap, FiLayout, FiEdit3, FiGlobe, FiLayers } from 'react-icons/fi';
+import { FiArrowRight, FiZap, FiLayout, FiEdit3, FiGlobe, FiLayers, FiMessageSquare } from 'react-icons/fi';
 
 const features = [
-  { icon: <FiZap size={24} />, title: 'AI-Powered', desc: 'Paste your resume and watch AI transform it into a compelling narrative.' },
-  { icon: <FiLayout size={24} />, title: '5 Stunning Themes', desc: 'Choose from Minimal, Glassmorphism, Neobrutalism, Y2K, or Clay UI.' },
-  { icon: <FiEdit3 size={24} />, title: 'Easy Editing', desc: 'Update your portfolio with simple field edits or AI-powered prompts.' },
-  { icon: <FiGlobe size={24} />, title: 'Instant Publishing', desc: 'Get a shareable public link to send to recruiters and connections.' },
-  { icon: <FiLayers size={24} />, title: 'Animated Sections', desc: 'Hero, About, Skills, Projects, Timeline, and Contact — all animated.' },
+  { icon: <FiZap size={24} />, title: 'Dual AI Engine', desc: 'Powered by Ollama and OpenRouter for reliable, high-quality content generation.' },
+  { icon: <FiMessageSquare size={24} />, title: 'AI Portfolio Twin', desc: 'A custom-trained AI assistant that interviews with recruiters on your behalf 24/7.' },
+  { icon: <FiLayers size={24} />, title: '5 Designer Themes', desc: 'Choose from Minimal, Glassmorphism, Neobrutalism, Y2K, or Clay UI styles.' },
+  { icon: <FiEdit3 size={24} />, title: 'Smart Editor', desc: 'Refine your story manually or use AI to instantly regenerate any section.' },
+  { icon: <FiGlobe size={24} />, title: 'Live Analytics', desc: 'Track views and manage recruiter inquiries directly from your personal dashboard.' },
+  { icon: <FiLayout size={24} />, title: 'Story-Driven', desc: 'Transfers dry resume bullets into a compelling professional narrative.' },
 ];
 
 const themePreviewColors = [
